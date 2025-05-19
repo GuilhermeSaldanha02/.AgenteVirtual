@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% block content %}
+    <article class="media content-section">
+      <div class="media-body">
+        <div class="article-metadata">
+          <small class="text-muted">Registrada por: {{ occurrence.author.username }}</small><br>
+          <small class="text-muted">Data: {{ occurrence.date_posted.strftime('%Y-%m-%d %H:%M') }}</small><br>
+          <small class="text-muted">Status: <span class="badge badge-secondary">{{ occurrence.status }}</span></small><br>
+          <small class="text-muted">Unidade Afetada: {{ occurrence.unit_number }}</small>
+        </div>
+        <h2 class="article-title mt-3">{{ occurrence.title }}</h2>
+        <p class="article-content">{{ occurrence.description }}</p>
+        
+        {% if occurrence.author == current_user %}
+            <!-- Adicionar botões para ações futuras como "Gerar Advertência PDF", "Marcar como Resolvida" etc. -->
+            <a href="{{ url_for('generate_warning_pdf', occurrence_id=occurrence.id) }}" class="btn btn-primary mt-3">Gerar Advertência em PDF</a>
+            <!-- <a href="#" class="btn btn-info mt-3">Enviar Notificação por Email</a> -->
+        {% endif %}
+      </div>
+    </article>
+{% endblock content %}
