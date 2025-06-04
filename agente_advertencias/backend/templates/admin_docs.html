@@ -1,0 +1,119 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section">
+        <h2>Gerenciamento de Documentos do Condomínio</h2>
+        <p class="text-muted">Nesta área você pode carregar e gerenciar o Regimento Interno e a Convenção Condominial.</p>
+        
+        <div class="row mt-4">
+            <!-- Regimento Interno -->
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h4>Regimento Interno</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if doc_info.regimento_interno.pdf_exists %}
+                            <div class="alert alert-success">
+                                <strong>Arquivo PDF:</strong> Carregado em {{ doc_info.regimento_interno.pdf_mtime }}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <strong>Arquivo PDF:</strong> Não carregado
+                            </div>
+                        {% endif %}
+                        
+                        {% if doc_info.regimento_interno.json_exists %}
+                            <div class="alert alert-success">
+                                <strong>Artigos Processados:</strong> Sim ({{ doc_info.regimento_interno.json_mtime }})
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <strong>Artigos Processados:</strong> Não
+                            </div>
+                        {% endif %}
+                        
+                        <form method="POST" enctype="multipart/form-data">
+                            {{ form_regimento.hidden_tag() }}
+                            <div class="form-group">
+                                {{ form_regimento.document_file.label(class="form-control-label") }}
+                                {{ form_regimento.document_file(class="form-control-file") }}
+                                {% if form_regimento.document_file.errors %}
+                                    {% for error in form_regimento.document_file.errors %}
+                                        <span class="text-danger">{{ error }}</span><br>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                {{ form_regimento.submit(class="btn btn-primary", value="Carregar Regimento") }}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Convenção Condominial -->
+            <div class="col-md-6">
+                <div class="card mb-4">
+                    <div class="card-header bg-info text-white">
+                        <h4>Convenção Condominial</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if doc_info.convencao_condominial.pdf_exists %}
+                            <div class="alert alert-success">
+                                <strong>Arquivo PDF:</strong> Carregado em {{ doc_info.convencao_condominial.pdf_mtime }}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <strong>Arquivo PDF:</strong> Não carregado
+                            </div>
+                        {% endif %}
+                        
+                        {% if doc_info.convencao_condominial.json_exists %}
+                            <div class="alert alert-success">
+                                <strong>Artigos Processados:</strong> Sim ({{ doc_info.convencao_condominial.json_mtime }})
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <strong>Artigos Processados:</strong> Não
+                            </div>
+                        {% endif %}
+                        
+                        <form method="POST" enctype="multipart/form-data">
+                            {{ form_convencao.hidden_tag() }}
+                            <div class="form-group">
+                                {{ form_convencao.document_file.label(class="form-control-label") }}
+                                {{ form_convencao.document_file(class="form-control-file") }}
+                                {% if form_convencao.document_file.errors %}
+                                    {% for error in form_convencao.document_file.errors %}
+                                        <span class="text-danger">{{ error }}</span><br>
+                                    {% endfor %}
+                                {% endif %}
+                            </div>
+                            <div class="form-group">
+                                {{ form_convencao.submit(class="btn btn-info", value="Carregar Convenção") }}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Instruções -->
+        <div class="card mt-3">
+            <div class="card-header bg-secondary text-white">
+                <h4>Instruções</h4>
+            </div>
+            <div class="card-body">
+                <ol>
+                    <li>Carregue o arquivo PDF do Regimento Interno e/ou da Convenção Condominial.</li>
+                    <li>O sistema processará automaticamente o documento para extrair os artigos.</li>
+                    <li>Cada novo upload substituirá o arquivo anterior do mesmo tipo.</li>
+                    <li>Os artigos extraídos serão utilizados para auxiliar no registro de ocorrências e consultas.</li>
+                </ol>
+                <div class="alert alert-info">
+                    <strong>Nota:</strong> Para melhor extração dos artigos, certifique-se de que o PDF esteja bem formatado, com os artigos claramente identificados (ex: "Artigo 1:", "Artigo 2:", etc.).
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

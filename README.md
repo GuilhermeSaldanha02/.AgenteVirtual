@@ -1,3 +1,10 @@
+Comando para Extensões:
+
+pip install -r agente_advertencias/backend/requirements.txt
+
+Caso necessario atualizar pip:
+python.exe -m pip install --upgrade pip
+
 Funcionalidades
 
 Autenticação de Usuários:

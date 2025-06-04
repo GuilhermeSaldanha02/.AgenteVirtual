@@ -1,0 +1,18 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="jumbotron">
+    <h1 class="display-4">Bem-vindo ao Agente de Advertências!</h1>
+    <p class="lead">Este sistema ajuda na gestão de ocorrências e advertências do condomínio.</p>
+    <hr class="my-4">
+    {% if not current_user.is_authenticated %}
+    <p>Para começar, você pode se registrar ou fazer login.</p>
+    <a class="btn btn-primary btn-lg" href="{{ url_for('register') }}" role="button">Registrar</a>
+    <a class="btn btn-secondary btn-lg" href="{{ url_for('login') }}" role="button">Login</a>
+    {% else %}
+    <p>Você está logado como {{ current_user.username }}.</p>
+    <a class="btn btn-info btn-lg" href="{{ url_for('new_occurrence') }}" role="button">Registrar Nova Ocorrência</a>
+    <a class="btn btn-success btn-lg" href="{{ url_for('list_occurrences') }}" role="button">Ver Minhas Ocorrências</a>
+    {% endif %}
+</div>
+{% endblock content %}

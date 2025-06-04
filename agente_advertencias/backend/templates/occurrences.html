@@ -1,0 +1,51 @@
+{% extends "layout.html" %}
+{% block content %}
+    <h1 class="mb-4">Minhas Ocorrências</h1>
+    {% if occurrences.items %}
+        {% for occurrence in occurrences.items %}
+            <article class="media content-section">
+              <div class="media-body">
+                <div class="article-metadata">
+                  <small class="text-muted">Registrada em: {{ occurrence.date_posted.strftime('%Y-%m-%d %H:%M') }}</small><br>
+                  <small class="text-muted">Status: {{ occurrence.status }}</small><br>
+                  <small class="text-muted">Unidade: {{ occurrence.unit_number }}</small>
+                </div>
+                <h2><a class="article-title" href="{{ url_for('view_occurrence', occurrence_id=occurrence.id) }}">{{ occurrence.title }}</a></h2>
+                <p class="article-content">{{ occurrence.description[:200] }}{% if occurrence.description|length > 200 %}...{% endif %}</p>
+              </div>
+            </article>
+        {% endfor %}
+    {% else %}
+        <p>Nenhuma ocorrência registrada ainda. <a href="{{ url_for('new_occurrence') }}">Registrar uma nova ocorrência?</a></p>
+    {% endif %}
+
+    {% if occurrences.pages > 1 %}
+        <nav aria-label="Page navigation">
+            <ul class="pagination justify-content-center">
+                {% if occurrences.has_prev %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('list_occurrences', page=occurrences.prev_num) }}">Anterior</a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">Anterior</span></li>
+                {% endif %}
+
+                {% for page_num in occurrences.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                    {% if page_num %}
+                        {% if occurrences.page == page_num %}
+                            <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                        {% else %}
+                            <li class="page-item"><a class="page-link" href="{{ url_for('list_occurrences', page=page_num) }}">{{ page_num }}</a></li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if occurrences.has_next %}
+                    <li class="page-item"><a class="page-link" href="{{ url_for('list_occurrences', page=occurrences.next_num) }}">Próxima</a></li>
+                {% else %}
+                    <li class="page-item disabled"><span class="page-link">Próxima</span></li>
+                {% endif %}
+            </ul>
+        </nav>
+    {% endif %}
+{% endblock content %}

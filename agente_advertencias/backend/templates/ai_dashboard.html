@@ -1,0 +1,325 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h1>Dashboard de Inteligência Artificial</h1>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Padrões Identificados</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="patternsChart" width="400" height="300"></canvas>
+                    <div class="mt-3 text-center">
+                        <a href="{{ url_for('ai_patterns') }}" class="btn btn-outline-primary">Ver Detalhes</a>
+                        <button id="analyzeBtn" class="btn btn-success ml-2">Analisar Novos Padrões</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">Previsões por Status</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="predictionsChart" width="400" height="300"></canvas>
+                    <div class="mt-3 text-center">
+                        <a href="{{ url_for('ai_predictions') }}" class="btn btn-outline-info">Ver Detalhes</a>
+                        <button id="predictBtn" class="btn btn-success ml-2">Gerar Novas Previsões</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="card-title mb-0">Advertências Automatizadas</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="warningsChart" width="400" height="300"></canvas>
+                    <div class="mt-3 text-center">
+                        <a href="{{ url_for('ai_automated_warnings') }}" class="btn btn-outline-warning">Ver Detalhes</a>
+                        <button id="processRulesBtn" class="btn btn-success ml-2">Processar Regras</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="card-title mb-0">Alertas Recentes</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Título</th>
+                                    <th>Nível</th>
+                                    <th>Data</th>
+                                </tr>
+                            </thead>
+                            <tbody id="alertsTable">
+                                {% for alert in data.recent_alerts %}
+                                <tr>
+                                    <td>{{ alert.title }}</td>
+                                    <td>
+                                        <span class="badge {% if alert.level == 'alto' %}badge-danger{% elif alert.level == 'médio' %}badge-warning{% else %}badge-info{% endif %}">
+                                            {{ alert.level }}
+                                        </span>
+                                    </td>
+                                    <td>{{ alert.created_at }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-3 text-center">
+                        <a href="{{ url_for('ai_alerts') }}" class="btn btn-outline-danger">Ver Todos os Alertas</a>
+                        <button id="generateAlertsBtn" class="btn btn-success ml-2">Gerar Alertas</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-12">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">Previsões para os Próximos 30 Dias</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="calendarChart" width="800" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Dados do backend
+    const dashboardData = {{ data|tojson }};
+    
+    // Gráfico de Padrões
+    const patternCtx = document.getElementById('patternsChart').getContext('2d');
+    const patternLabels = Object.keys(dashboardData.pattern_counts);
+    const patternData = Object.values(dashboardData.pattern_counts);
+    
+    new Chart(patternCtx, {
+        type: 'pie',
+        data: {
+            labels: patternLabels,
+            datasets: [{
+                data: patternData,
+                backgroundColor: [
+                    'rgba(255, 99, 132, 0.7)',
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)',
+                    'rgba(153, 102, 255, 0.7)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                }
+            }
+        }
+    });
+    
+    // Gráfico de Previsões
+    const predictionCtx = document.getElementById('predictionsChart').getContext('2d');
+    const predictionLabels = Object.keys(dashboardData.prediction_status_counts);
+    const predictionData = Object.values(dashboardData.prediction_status_counts);
+    
+    new Chart(predictionCtx, {
+        type: 'doughnut',
+        data: {
+            labels: predictionLabels,
+            datasets: [{
+                data: predictionData,
+                backgroundColor: [
+                    'rgba(54, 162, 235, 0.7)',
+                    'rgba(255, 206, 86, 0.7)',
+                    'rgba(75, 192, 192, 0.7)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'right',
+                }
+            }
+        }
+    });
+    
+    // Gráfico de Advertências
+    const warningCtx = document.getElementById('warningsChart').getContext('2d');
+    const warningLabels = Object.keys(dashboardData.warning_status_counts);
+    const warningData = Object.values(dashboardData.warning_status_counts);
+    
+    new Chart(warningCtx, {
+        type: 'bar',
+        data: {
+            labels: warningLabels,
+            datasets: [{
+                label: 'Advertências por Status',
+                data: warningData,
+                backgroundColor: 'rgba(255, 159, 64, 0.7)',
+                borderColor: 'rgba(255, 159, 64, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+    
+    // Gráfico de Calendário
+    const calendarCtx = document.getElementById('calendarChart').getContext('2d');
+    const calendarLabels = dashboardData.upcoming_predictions.map(p => p.date);
+    const calendarData = dashboardData.upcoming_predictions.map(p => p.count);
+    
+    new Chart(calendarCtx, {
+        type: 'bar',
+        data: {
+            labels: calendarLabels,
+            datasets: [{
+                label: 'Previsões',
+                data: calendarData,
+                backgroundColor: 'rgba(40, 167, 69, 0.7)',
+                borderColor: 'rgba(40, 167, 69, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        precision: 0
+                    }
+                }
+            }
+        }
+    });
+    
+    // Botões de ação
+    document.getElementById('analyzeBtn').addEventListener('click', function() {
+        fetch('{{ url_for("ai_analyze") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Erro: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Ocorreu um erro ao analisar padrões.');
+        });
+    });
+    
+    document.getElementById('predictBtn').addEventListener('click', function() {
+        fetch('{{ url_for("ai_predict") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Erro: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Ocorreu um erro ao gerar previsões.');
+        });
+    });
+    
+    document.getElementById('processRulesBtn').addEventListener('click', function() {
+        fetch('{{ url_for("ai_process_rules") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Erro: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Ocorreu um erro ao processar regras.');
+        });
+    });
+    
+    document.getElementById('generateAlertsBtn').addEventListener('click', function() {
+        fetch('{{ url_for("ai_generate_alerts") }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token() }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert(data.message);
+                location.reload();
+            } else {
+                alert('Erro: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Erro:', error);
+            alert('Ocorreu um erro ao gerar alertas.');
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,159 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h1>Gerenciamento de Atas</h1>
+    
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">Ações Rápidas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('new_minute') }}" class="btn btn-success">
+                            <i class="fas fa-plus-circle"></i> Nova Ata
+                        </a>
+                        <a href="{{ url_for('minute_templates') }}" class="btn btn-info">
+                            <i class="fas fa-file-alt"></i> Gerenciar Templates
+                        </a>
+                        <a href="{{ url_for('minutes_dashboard') }}" class="btn btn-primary">
+                            <i class="fas fa-chart-bar"></i> Dashboard de Atas
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">Filtrar Atas</h5>
+                </div>
+                <div class="card-body">
+                    <form method="GET" action="{{ url_for('minutes_list') }}">
+                        <div class="mb-3">
+                            <label for="query" class="form-label">Buscar por título ou local:</label>
+                            <input type="text" class="form-control" id="query" name="query" value="{{ query }}">
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="meeting_type" class="form-label">Tipo de Reunião:</label>
+                                    <select class="form-select" id="meeting_type" name="meeting_type">
+                                        <option value="" {% if not meeting_type %}selected{% endif %}>Todos</option>
+                                        <option value="ordinária" {% if meeting_type == 'ordinária' %}selected{% endif %}>Ordinária</option>
+                                        <option value="extraordinária" {% if meeting_type == 'extraordinária' %}selected{% endif %}>Extraordinária</option>
+                                        <option value="conselho" {% if meeting_type == 'conselho' %}selected{% endif %}>Conselho</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">Status:</label>
+                                    <select class="form-select" id="status" name="status">
+                                        <option value="" {% if not status %}selected{% endif %}>Todos</option>
+                                        <option value="rascunho" {% if status == 'rascunho' %}selected{% endif %}>Rascunho</option>
+                                        <option value="finalizada" {% if status == 'finalizada' %}selected{% endif %}>Finalizada</option>
+                                        <option value="publicada" {% if status == 'publicada' %}selected{% endif %}>Publicada</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search"></i> Filtrar
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="card">
+        <div class="card-header bg-dark text-white">
+            <h5 class="card-title mb-0">Atas Registradas</h5>
+        </div>
+        <div class="card-body">
+            {% if minutes %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Tipo</th>
+                                <th>Data</th>
+                                <th>Status</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for minute in minutes %}
+                                <tr>
+                                    <td>{{ minute.title }}</td>
+                                    <td>
+                                        <span class="badge {% if minute.meeting_type == 'ordinária' %}bg-primary{% elif minute.meeting_type == 'extraordinária' %}bg-warning{% else %}bg-info{% endif %}">
+                                            {{ minute.meeting_type|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>{{ minute.meeting_date.strftime('%d/%m/%Y') }}</td>
+                                    <td>
+                                        <span class="badge {% if minute.status == 'rascunho' %}bg-secondary{% elif minute.status == 'finalizada' %}bg-success{% else %}bg-info{% endif %}">
+                                            {{ minute.status|capitalize }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ url_for('view_minute', minute_id=minute.id) }}" class="btn btn-sm btn-primary" title="Visualizar">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            <a href="{{ url_for('edit_minute', minute_id=minute.id) }}" class="btn btn-sm btn-warning" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <a href="{{ url_for('generate_minute_pdf', minute_id=minute.id) }}" class="btn btn-sm btn-success" title="Gerar PDF">
+                                                <i class="fas fa-file-pdf"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-danger" title="Excluir" 
+                                                    data-bs-toggle="modal" data-bs-target="#deleteModal{{ minute.id }}">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                        
+                                        <!-- Modal de confirmação de exclusão -->
+                                        <div class="modal fade" id="deleteModal{{ minute.id }}" tabindex="-1" aria-labelledby="deleteModalLabel{{ minute.id }}" aria-hidden="true">
+                                            <div class="modal-dialog">
+                                                <div class="modal-content">
+                                                    <div class="modal-header bg-danger text-white">
+                                                        <h5 class="modal-title" id="deleteModalLabel{{ minute.id }}">Confirmar Exclusão</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <p>Tem certeza que deseja excluir a ata <strong>{{ minute.title }}</strong>?</p>
+                                                        <p class="text-danger"><small>Esta ação não pode ser desfeita.</small></p>
+                                                    </div>
+                                                    <div class="modal-footer">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                        <form action="{{ url_for('delete_minute', minute_id=minute.id) }}" method="POST">
+                                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                            <button type="submit" class="btn btn-danger">Excluir</button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Nenhuma ata encontrada com os filtros selecionados.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
